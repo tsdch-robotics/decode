@@ -27,16 +27,16 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This is the Tuning class. It contains a selection menu for various tuning OpModes.
- *
- * @author Baron Henderson - 20077 The Indubitables
- * @version 1.0, 6/26/2025
- */
-@Configurable
-@TeleOp(name = "Tuning", group = "Pedro Pathing")
-public class Tuning extends SelectableOpMode {
-    public static Follower follower;
+    /**
+     * This is the Tuning class. It contains a selection menu for various tuning OpModes.
+     *
+     * @author Baron Henderson - 20077 The Indubitables
+     * @version 1.0, 6/26/2025
+     */
+    @Configurable
+    @TeleOp(name = "Tuning", group = "Pedro Pathing")
+    public class Tuning extends SelectableOpMode {
+        public static Follower follower;
 
     @IgnoreConfigurable
     static PoseHistory poseHistory;
