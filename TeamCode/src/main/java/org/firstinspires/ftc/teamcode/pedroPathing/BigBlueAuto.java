@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.pedroPathing; // make sure this aligns with class location
 
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.telemetryM;
-
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -11,16 +9,16 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-@Autonomous(name = "Pedruto", group = "Examples")
-public class ExampleAuto extends OpMode {
+@Autonomous(name = "BigBlueAuto", group = "Examples")
+public class BigBlueAuto extends OpMode {
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
 
     private int pathState;
-    private final Pose startPose = new Pose(53.02, 6.3, Math.toRadians(0)); // Start Pose of our robot.
-    private final Pose FirstUPPose = new Pose(53.02, 50, Math.toRadians(90));
-    private final Pose scorePose = new Pose(53.02, 19, Math.toRadians(25)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose startPose = new Pose(16, 128, Math.toRadians(0)); // Start Pose of our robot.
+    private final Pose FirstUPPose = new Pose(62, 76, Math.toRadians(0));
+    private final Pose scorePose = new Pose(53.02, 20, Math.toRadians(45)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose pickup1Pose = new Pose(53.02, 70, Math.toRadians(0)); // Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark.
     private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0)); // Lowest (Third Set) of Artifacts from the Spike Mark.
@@ -30,9 +28,9 @@ public class ExampleAuto extends OpMode {
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-       // scorePreload = new Path(new BezierLine(startPose, scorePose));
-       // scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-        follower.setPose(new Pose());
+        // scorePreload = new Path(new BezierLine(startPose, scorePose));
+        // scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+
         FirstUP = new Path(new BezierLine(startPose, FirstUPPose));
         FirstUP.setLinearHeadingInterpolation(startPose.getHeading(), FirstUPPose.getHeading());
 
@@ -40,40 +38,40 @@ public class ExampleAuto extends OpMode {
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
 
         /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-         scorePickup1 = follower.pathBuilder()
+        scorePickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(FirstUPPose, scorePose))
-             .setLinearHeadingInterpolation(FirstUPPose.getHeading(), scorePose.getHeading())
-              .build();
+                .setLinearHeadingInterpolation(FirstUPPose.getHeading(), scorePose.getHeading())
+                .build();
 //
-       // /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-       // scorePickup1 = follower.pathBuilder()
-       //         .addPath(new BezierLine(pickup1Pose, scorePose))
-       //         .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
-       //         .build();
+        // /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        // scorePickup1 = follower.pathBuilder()
+        //         .addPath(new BezierLine(pickup1Pose, scorePose))
+        //         .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+        //         .build();
 
         /* This is our grabPickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-       // grabPickup2 = follower.pathBuilder()
-       //         .addPath(new BezierLine(scorePose, pickup2Pose))
-       //         .setLinearHeadingInterpolation(scorePose.getHeading(), pickup2Pose.getHeading())
-       //         .build();
+        // grabPickup2 = follower.pathBuilder()
+        //         .addPath(new BezierLine(scorePose, pickup2Pose))
+        //         .setLinearHeadingInterpolation(scorePose.getHeading(), pickup2Pose.getHeading())
+        //         .build();
 //
-       // /* This is our scorePickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-       // scorePickup2 = follower.pathBuilder()
-       //         .addPath(new BezierLine(pickup2Pose, scorePose))
-       //         .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
-       //         .build();
+        // /* This is our scorePickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        // scorePickup2 = follower.pathBuilder()
+        //         .addPath(new BezierLine(pickup2Pose, scorePose))
+        //         .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
+        //         .build();
 //
-       // /* This is our grabPickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-       // grabPickup3 = follower.pathBuilder()
-       //         .addPath(new BezierLine(scorePose, pickup3Pose))
-       //         .setLinearHeadingInterpolation(scorePose.getHeading(), pickup3Pose.getHeading())
-       //         .build();
+        // /* This is our grabPickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        // grabPickup3 = follower.pathBuilder()
+        //         .addPath(new BezierLine(scorePose, pickup3Pose))
+        //         .setLinearHeadingInterpolation(scorePose.getHeading(), pickup3Pose.getHeading())
+        //         .build();
 //
-       // /* This is our scorePickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-       // scorePickup3 = follower.pathBuilder()
-       //         .addPath(new BezierLine(pickup3Pose, scorePose))
-       //         .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
-       //         .build();
+        // /* This is our scorePickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+        // scorePickup3 = follower.pathBuilder()
+        //         .addPath(new BezierLine(pickup3Pose, scorePose))
+        //         .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+        //         .build();
     }
 
     public void autonomousPathUpdate() {
@@ -91,14 +89,14 @@ public class ExampleAuto extends OpMode {
             */
 
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if (!follower.isBusy()) {
+               // if (!follower.isBusy()) {
                     /* Score Preload */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(scorePickup1, true);
-                    setPathState(2);
-                }
-                break;
+          //          follower.followPath(scorePickup1, true);
+            //        setPathState(2);
+              //  }
+            //    break;
             case 2:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
                 if (!follower.isBusy()) {
