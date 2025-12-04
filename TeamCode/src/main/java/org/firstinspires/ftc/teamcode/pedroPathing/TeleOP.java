@@ -10,8 +10,13 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.Servo;
+import android.graphics.Color;
 import java.util.function.Supplier;
+
 
 @Configurable
 @TeleOp
@@ -24,6 +29,21 @@ public class TeleOP extends OpMode {
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
 
+    public DcMotor FIntake;
+    public DcMotor BIntake;
+    public DcMotor Shoot;
+    public DcMotor Lift;
+    public Servo Hood;
+    public Servo SpinTop;
+    public Servo Pod1;
+    public Servo Pod2;
+    public Servo Pod3;
+    NormalizedColorSensor ColorSns1;
+    NormalizedColorSensor ColorSns2;
+    NormalizedColorSensor ColorSns3;
+    //boolean FIntakeOn = false;
+    //boolean BIntakeOn = false;
+
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
@@ -35,6 +55,43 @@ public class TeleOP extends OpMode {
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
                 .build();
+
+
+        //other motors
+        FIntake = hardwareMap.get(DcMotor.class, "FIntake");
+        BIntake = hardwareMap.get(DcMotor.class, "BIntake");
+        Shoot = hardwareMap.get(DcMotor.class, "Shoot");
+        Shoot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Lift = hardwareMap.get(DcMotor.class, "Lift");
+
+
+        //Servos
+        Hood= hardwareMap.get(Servo.class, "Hood");
+        Hood.setDirection(Servo.Direction.FORWARD);
+        Hood.setPosition(0);
+        SpinTop= hardwareMap.get(Servo.class, "SpinTop");
+        SpinTop.setDirection(Servo.Direction.FORWARD);
+        SpinTop.setPosition(0);
+        Pod1= hardwareMap.get(Servo.class, "Larm");
+        Pod1.setDirection(Servo.Direction.FORWARD);
+        Pod1.setPosition(0);
+        Pod2= hardwareMap.get(Servo.class, "Larm");
+        Pod2.setDirection(Servo.Direction.FORWARD);
+        Pod2.setPosition(0);
+        Pod3= hardwareMap.get(Servo.class, "Larm");
+        Pod3.setDirection(Servo.Direction.FORWARD);
+        Pod3.setPosition(0);
+
+
+        //for color sensors
+        float gain = 2;
+        ColorSns1 = hardwareMap.get(NormalizedColorSensor.class, "Color1");
+        ColorSns1.setGain(gain);
+        ColorSns2 = hardwareMap.get(NormalizedColorSensor.class, "Color2");
+        ColorSns2.setGain(gain);
+        ColorSns3 = hardwareMap.get(NormalizedColorSensor.class, "Color2");
+        ColorSns3.setGain(gain);
+
     }
 
     @Override
@@ -73,24 +130,24 @@ public class TeleOP extends OpMode {
         }
 
         //Automated PathFollowing
-        if (gamepad1.aWasPressed()) {
+        if (gamepad2.aWasPressed()) {
             follower.followPath(pathChain.get());
             automatedDrive = true;
         }
 
         //Stop automated following if the follower is done
-        if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
+        if (automatedDrive && (gamepad2.bWasPressed() || !follower.isBusy())) {
             follower.startTeleopDrive();
             automatedDrive = false;
         }
 
         //Slow Mode
-        if (gamepad1.rightBumperWasPressed()) {
+        if (gamepad2.rightBumperWasPressed()) {
             slowMode = !slowMode;
         }
 
         //Optional way to change slow mode strength
-        if (gamepad1.xWasPressed()) {
+        if (gamepad2.xWasPressed()) {
             slowModeMultiplier += 0.25;
         }
 
@@ -99,10 +156,101 @@ public class TeleOP extends OpMode {
             slowModeMultiplier -= 0.25;
         }
 
+        //intakes
+        if (gamepad1.right_trigger > 0.5) {
+            FIntake.setPower(1);
+        }
+        if(gamepad1.right_trigger>.5 && FIntake.isBusy()){
+            FIntake.setPower(0);
+        }
+        if (gamepad1.left_trigger > 0.5) {
+            BIntake.setPower(1);
+        }
+        if(gamepad1.left_trigger>.5 && FIntake.isBusy()){
+            BIntake.setPower(0);
+        }
+
+        //get distance from limelight and put shooter in correct position
+        if(gamepad1.dpad_up){
+            //shoot at correct speed
+            Shoot.setPower(1);
+        }
+        if(Shoot.getCurrentPosition()> 3000){
+            gamepad1.rumble(200);
+        }
+        if(gamepad1.x && Shoot.getCurrentPosition() > 3000 ){
+            Pod1.setPosition(.5);
+        }
+        if(gamepad1.y && Shoot.getCurrentPosition() > 3000 ){
+            Pod2.setPosition(.5);
+        }
+        if(gamepad1.b && Shoot.getCurrentPosition() > 3000 ){
+            Pod3.setPosition(.5);
+        }
+        if(gamepad1.a){
+            Pod1.setPosition(0);
+            Pod2.setPosition(0);
+            Pod3.setPosition(0);
+
+        }
+
+
+
+
+        NormalizedRGBA colors1 = ColorSns1.getNormalizedColors();
+        NormalizedRGBA colors2 = ColorSns2.getNormalizedColors();
+        NormalizedRGBA colors3 = ColorSns3.getNormalizedColors();
+        /* Use telemetry to display feedback on the driver station. We show the red, green, and blue
+         * normalized values from the sensor (in the range of 0 to 1), as well as the equivalent
+         * HSV (hue, saturation and value) values. See http://web.archive.org/web/20190311170843/https://infohost.nmt.edu/tcc/help/pubs/colortheory/web/hsv.html
+         * for an explanation of HSV color. */
+        final float[] hsvValues1 = new float[3];
+        final float[] hsvValues2 = new float[3];
+        final float[] hsvValues3 = new float[3];
+        // Update the hsvValues array by passing it to Color.colorToHSV()
+        Color.colorToHSV(colors1.toColor(), hsvValues1);
+        Color.colorToHSV(colors2.toColor(), hsvValues2);
+        Color.colorToHSV(colors3.toColor(), hsvValues3);
+
+
+        telemetry.addLine()
+                .addData("Red", "%.3f", colors1.red)
+                .addData("Green", "%.3f", colors1.green)
+                .addData("Blue", "%.3f", colors1.blue);
+        telemetry.addLine()
+                .addData("Hue", "%.3f", hsvValues1[0])
+                .addData("Saturation", "%.3f", hsvValues1[1])
+                .addData("Value", "%.3f", hsvValues1[2]);
+        telemetry.addData("Alpha", "%.3f", colors1.alpha);
+
+        telemetry.addLine()
+                .addData("Red", "%.3f", colors2.red)
+                .addData("Green", "%.3f", colors2.green)
+                .addData("Blue", "%.3f", colors2.blue);
+        telemetry.addLine()
+                .addData("Hue", "%.3f", hsvValues2[0])
+                .addData("Saturation", "%.3f", hsvValues2[1])
+                .addData("Value", "%.3f", hsvValues2[2]);
+        telemetry.addData("Alpha", "%.3f", colors2.alpha);
+
+        telemetry.addLine()
+                .addData("Red", "%.3f", colors3.red)
+                .addData("Green", "%.3f", colors3.green)
+                .addData("Blue", "%.3f", colors3.blue);
+        telemetry.addLine()
+                .addData("Hue", "%.3f", hsvValues3[0])
+                .addData("Saturation", "%.3f", hsvValues3[1])
+                .addData("Value", "%.3f", hsvValues3[2]);
+        telemetry.addData("Alpha", "%.3f", colors3.alpha);
+
+
         telemetryM.debug("position", follower.getPose());
         telemetryM.debug("velocity", follower.getVelocity());
         telemetryM.debug("automatedDrive", automatedDrive);
         telemetry.addData("position", follower.getPose());
+
+        telemetry.addLine()
+                .addData("Shoot Speed", Shoot.getCurrentPosition());
         updateTelemetry(telemetry);
     }
 }
