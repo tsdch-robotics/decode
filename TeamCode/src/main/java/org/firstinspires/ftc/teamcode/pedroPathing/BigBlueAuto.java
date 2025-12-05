@@ -10,14 +10,18 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.SimpleLimelight;
+
 @Autonomous(name = "BigBlueAuto", group = "Examples")
 public class BigBlueAuto extends OpMode {
 
     private Follower follower;
+
+    private SimpleLimelight camera;
     private Timer pathTimer, actionTimer, opmodeTimer;
 
     private int pathState;
-    private final Pose startPose = new Pose(16, 128, Math.toRadians(0)); // Start Pose of our robot.
+    private Pose startPose = new Pose(16, 128, Math.toRadians(0)); // Start Pose of our robot.
     private final Pose FirstUPPose = new Pose(62, 106, Math.toRadians(125));//score PreLoad
     private final Pose scorePose = new Pose(62, 106, Math.toRadians(125)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose pickup1Pose = new Pose(20, 116, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
@@ -216,6 +220,7 @@ public class BigBlueAuto extends OpMode {
 
 
         follower = Constants.createFollower(hardwareMap);
+        camera = new SimpleLimelight(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
 
@@ -226,6 +231,16 @@ public class BigBlueAuto extends OpMode {
      **/
     @Override
     public void init_loop() {
+        Pose visiblePose = camera.getPedroPose();
+
+        if (visiblePose != null) {
+            startPose = visiblePose;
+            follower.setStartingPose(startPose);
+            telemetry.addData("Limelight", "LOCKED: " + startPose.getX() + ", " + startPose.getY());
+        } else {
+            telemetry.addData("Limelight", "Searching...");
+        }
+        telemetry.update();
     }
 
     /**
@@ -235,7 +250,9 @@ public class BigBlueAuto extends OpMode {
     @Override
     public void start() {
         opmodeTimer.resetTimer();
+        buildPaths();
         setPathState(0);
+        camera.stop();
     }
 
     /**
