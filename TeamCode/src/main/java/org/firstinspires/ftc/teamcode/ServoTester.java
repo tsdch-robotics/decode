@@ -21,7 +21,9 @@ public class ServoTester extends LinearOpMode {
     @Override
     public void runOpMode() {
         Triangles = hardwareMap.get(Servo.class, "Triangles");
-        Triangles.setDirection(Servo.Direction.REVERSE);
+        Triangles.setDirection(Servo.Direction.FORWARD);
+        //pod2 reverse
+        //pod3forward
         Triangles.scaleRange(0.0, 1.0);
         Triangles.setPosition(0.0);
 
@@ -32,7 +34,7 @@ public class ServoTester extends LinearOpMode {
                 Triangles.setPosition(0.0);
             }
             if (gamepad1.b) {
-                Triangles.setPosition(0.5);
+                Triangles.setPosition(0.3);
             }
             if(gamepad1.x){
 

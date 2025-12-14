@@ -11,9 +11,12 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import android.graphics.Color;
 import java.util.function.Supplier;
 
@@ -32,7 +35,7 @@ public class TeleOP extends OpMode {
     public DcMotor FIntake;
     public DcMotor BIntake;
     public DcMotor Shoot;
-    public DcMotor Lift;
+    //public DcMotor Lift;
     public Servo Hood;
     public Servo SpinTop;
     public Servo Pod1;
@@ -43,6 +46,16 @@ public class TeleOP extends OpMode {
     NormalizedColorSensor ColorSns3;
     //boolean FIntakeOn = false;
     //boolean BIntakeOn = false;
+// Add these fields to the class (around line 34-37)
+    private ElapsedTime servoTimer1 = new ElapsedTime();
+    private boolean servo1Extended = false;
+    private boolean servo1Waiting = false;
+    private ElapsedTime servoTimer2 = new ElapsedTime();
+    private boolean servo2Extended = false;
+    private boolean servo2Waiting = false;
+    private ElapsedTime servoTimer3 = new ElapsedTime();
+    private boolean servo3Extended = false;
+    private boolean servo3Waiting = false;
 
     @Override
     public void init() {
@@ -59,26 +72,27 @@ public class TeleOP extends OpMode {
 
         //other motors
         FIntake = hardwareMap.get(DcMotor.class, "FIntake");
+        FIntake.setDirection(DcMotorSimple.Direction.REVERSE);
         BIntake = hardwareMap.get(DcMotor.class, "BIntake");
         Shoot = hardwareMap.get(DcMotor.class, "Shoot");
         Shoot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Lift = hardwareMap.get(DcMotor.class, "Lift");
+       // Lift = hardwareMap.get(DcMotor.class, "Lift");
 
 
         //Servos
         Hood= hardwareMap.get(Servo.class, "Hood");
         Hood.setDirection(Servo.Direction.FORWARD);
-        Hood.setPosition(0);
+        //Hood.setPosition(0);
         SpinTop= hardwareMap.get(Servo.class, "SpinTop");
         SpinTop.setDirection(Servo.Direction.FORWARD);
         SpinTop.setPosition(0);
-        Pod1= hardwareMap.get(Servo.class, "Larm");
+        Pod1= hardwareMap.get(Servo.class, "Pod1");
         Pod1.setDirection(Servo.Direction.FORWARD);
         Pod1.setPosition(0);
-        Pod2= hardwareMap.get(Servo.class, "Larm");
-        Pod2.setDirection(Servo.Direction.FORWARD);
-        Pod2.setPosition(0);
-        Pod3= hardwareMap.get(Servo.class, "Larm");
+        Pod2= hardwareMap.get(Servo.class, "Pod2");
+        Pod2.setDirection(Servo.Direction.REVERSE);
+        Pod2.setPosition(.1);
+        Pod3= hardwareMap.get(Servo.class, "Pod3");
         Pod3.setDirection(Servo.Direction.FORWARD);
         Pod3.setPosition(0);
 
@@ -89,7 +103,7 @@ public class TeleOP extends OpMode {
         ColorSns1.setGain(gain);
         ColorSns2 = hardwareMap.get(NormalizedColorSensor.class, "Color2");
         ColorSns2.setGain(gain);
-        ColorSns3 = hardwareMap.get(NormalizedColorSensor.class, "Color2");
+        ColorSns3 = hardwareMap.get(NormalizedColorSensor.class, "Color3");
         ColorSns3.setGain(gain);
 
     }
@@ -160,41 +174,77 @@ public class TeleOP extends OpMode {
         if (gamepad1.right_trigger > 0.5) {
             FIntake.setPower(1);
         }
-        if(gamepad1.right_trigger>.5 && FIntake.isBusy()){
+        else {
             FIntake.setPower(0);
         }
         if (gamepad1.left_trigger > 0.5) {
             BIntake.setPower(1);
         }
-        if(gamepad1.left_trigger>.5 && FIntake.isBusy()){
+        else {
             BIntake.setPower(0);
         }
+        if(gamepad1.bWasPressed()){
+            FIntake.setPower(0);
+            BIntake.setPower(0);
+        }
+
 
         //get distance from limelight and put shooter in correct position
         if(gamepad1.dpad_up){
             //shoot at correct speed
             Shoot.setPower(1);
         }
+        if(gamepad1.dpad_down){
+            Shoot.setPower(0);
+        }
+        /*
         if(Shoot.getCurrentPosition()> 3000){
-            gamepad1.rumble(200);
+            gamepad1.rumble(1000);
         }
-        if(gamepad1.x && Shoot.getCurrentPosition() > 3000 ){
-            Pod1.setPosition(.5);
+
+         */
+        if(gamepad1.b ){
+            Pod1.setPosition(.4);
+            servo1Extended = true;
+            servo1Waiting = true;
+            servoTimer1.reset();
         }
-        if(gamepad1.y && Shoot.getCurrentPosition() > 3000 ){
-            Pod2.setPosition(.5);
+        if (servo1Waiting && servoTimer1.seconds() >= 1.3) {
+            // Move servo back to home position
+            Pod1.setPosition(0.0);  // Replace with your actual servo
+            servo1Extended = false;
+            servo1Waiting = false;
         }
-        if(gamepad1.b && Shoot.getCurrentPosition() > 3000 ){
-            Pod3.setPosition(.5);
+        if(gamepad1.y ){
+            Pod2.setPosition(.4);
+            servo2Extended = true;
+            servo2Waiting = true;
+            servoTimer2.reset();
+        }
+        if (servo2Waiting && servoTimer2.seconds() >= 1.3) {
+            // Move servo back to home position
+            Pod2.setPosition(0.0);  // Replace with your actual servo
+            servo2Extended = false;
+            servo2Waiting = false;
+        }
+        if(gamepad1.x ){
+            Pod3.setPosition(.4);
+            servo3Extended = true;
+            servo3Waiting = true;
+            servoTimer3.reset();
+        }
+        if (servo3Waiting && servoTimer3.seconds() >= 1.3) {
+            // Move servo back to home position
+            Pod3.setPosition(0.0);  // Replace with your actual servo
+            servo3Extended = false;
+            servo3Waiting = false;
         }
         if(gamepad1.a){
             Pod1.setPosition(0);
-            Pod2.setPosition(0);
+            Pod2.setPosition(.0 );
             Pod3.setPosition(0);
 
         }
-
-
 
 
         NormalizedRGBA colors1 = ColorSns1.getNormalizedColors();
@@ -242,6 +292,41 @@ public class TeleOP extends OpMode {
                 .addData("Saturation", "%.3f", hsvValues3[1])
                 .addData("Value", "%.3f", hsvValues3[2]);
         telemetry.addData("Alpha", "%.3f", colors3.alpha);
+
+        if (hsvValues1[0] > 200){
+            telemetry.addData("color","purple");
+
+        }
+        if (130 <= hsvValues1[0] && hsvValues1[0] < 200){
+            telemetry.addData("color","green");
+
+        }
+        if (130 >= hsvValues1[0]) {
+            telemetry.addData("color","none");
+        }
+        if (hsvValues2[0] > 200){
+            telemetry.addData("color","purple");
+
+        }
+        if (130 <= hsvValues2[0] && hsvValues2[0] < 200){
+            telemetry.addData("color","green");
+
+        }
+        if (130 >= hsvValues2[0]) {
+            telemetry.addData("color","none");
+        }
+        if (hsvValues3[0] > 200){
+            telemetry.addData("color","purple");
+
+        }
+        if (130 <= hsvValues3[0] && hsvValues3[0] < 200){
+            telemetry.addData("color","green");
+
+        }
+        if (130 >= hsvValues3[0]) {
+            telemetry.addData("color","none");
+        }
+
 
 
         telemetryM.debug("position", follower.getPose());

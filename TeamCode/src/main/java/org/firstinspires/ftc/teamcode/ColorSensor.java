@@ -66,7 +66,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  */
 @TeleOp
 public class ColorSensor extends LinearOpMode {
-    public DcMotor intake;
+   // public DcMotor intake;
 
 
     /** The colorSensor field will contain a reference to our color sensor hardware object */
@@ -94,7 +94,7 @@ public class ColorSensor extends LinearOpMode {
 
 
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
-        intake = hardwareMap.get(DcMotor.class, "intake");
+
 
 
 
@@ -114,7 +114,7 @@ public class ColorSensor extends LinearOpMode {
             // Get the normalized colors from the sensor
             NormalizedRGBA colors = colorSensor.getNormalizedColors();
 
-            /* Use telemetry to display feedback on the driver station. We show the red, green, and blue
+            /* Use telemetry to display feedback on the driver station. We sxhow the red, green, and blue
              * normalized values from the sensor (in the range of 0 to 1), as well as the equivalent
              * HSV (hue, saturation and value) values. See http://web.archive.org/web/20190311170843/https://infohost.nmt.edu/tcc/help/pubs/colortheory/web/hsv.html
              * for an explanation of HSV color. */
@@ -131,22 +131,19 @@ public class ColorSensor extends LinearOpMode {
                     .addData("Saturation", "%.3f", hsvValues[1])
                     .addData("Value", "%.3f", hsvValues[2]);
             telemetry.addData("Alpha", "%.3f", colors.alpha);
-            if(gamepad1.right_trigger > .5){
-                intake.setPower(1);
+
+            if (hsvValues[0] > 200){
+                telemetry.addData("color","purple");
 
             }
-            if (hsvValues[0] > 210){
-                telemetry.addData("color","blue");
-                intake.setPower(0);
+            if (130 <= hsvValues[0] && hsvValues[0] < 200){
+                telemetry.addData("color","green");
+
             }
-            if (10<= hsvValues[0] && hsvValues[0] <= 30){
-                telemetry.addData("color","red");
-                intake.setPower(0);
+            if (130 >= hsvValues[0]) {
+                telemetry.addData("color","none");
             }
-            if (40<= hsvValues[0] && hsvValues[0] <= 80){
-                telemetry.addData("color","yellow");
-                intake.setPower(0);
-            }
+
 
             telemetry.update();
 

@@ -9,13 +9,30 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous(name = "BigBlueAuto", group = "Examples")
+@Autonomous(name = "BigRedAuto", group = "Examples")
 public class BigRedAuto extends OpMode {
+
+
+    public DcMotor FIntake;
+    public DcMotor BIntake;
+    public DcMotor Shoot;
+    public DcMotor Lift;
+    public Servo Hood;
+    public Servo SpinTop;
+    public Servo Pod1;
+    public Servo Pod2;
+    public Servo Pod3;
+    NormalizedColorSensor ColorSns1;
+    NormalizedColorSensor ColorSns2;
+    NormalizedColorSensor ColorSns3;
+
 
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
-
     private int pathState;
     private final Pose startPose = new Pose(16, 128, Math.toRadians(0)); // Start Pose of our robot.
     private final Pose FirstUPPose = new Pose(62, 106, Math.toRadians(125));//score PreLoad
@@ -203,6 +220,8 @@ public class BigRedAuto extends OpMode {
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.update();
+
+
     }
 
     /**
@@ -218,6 +237,41 @@ public class BigRedAuto extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
+
+        //other motors
+        FIntake = hardwareMap.get(DcMotor.class, "FIntake");
+        BIntake = hardwareMap.get(DcMotor.class, "BIntake");
+        Shoot = hardwareMap.get(DcMotor.class, "Shoot");
+        Shoot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Lift = hardwareMap.get(DcMotor.class, "Lift");
+
+
+        //Servos
+        Hood= hardwareMap.get(Servo.class, "Hood");
+        Hood.setDirection(Servo.Direction.FORWARD);
+        Hood.setPosition(0);
+        SpinTop= hardwareMap.get(Servo.class, "SpinTop");
+        SpinTop.setDirection(Servo.Direction.FORWARD);
+        SpinTop.setPosition(0);
+        Pod1= hardwareMap.get(Servo.class, "Larm");
+        Pod1.setDirection(Servo.Direction.FORWARD);
+        Pod1.setPosition(0);
+        Pod2= hardwareMap.get(Servo.class, "Larm");
+        Pod2.setDirection(Servo.Direction.REVERSE);
+        Pod2.setPosition(0);
+        Pod3= hardwareMap.get(Servo.class, "Larm");
+        Pod3.setDirection(Servo.Direction.FORWARD);
+        Pod3.setPosition(0);
+
+
+        //for color sensors
+        float gain = 2;
+        ColorSns1 = hardwareMap.get(NormalizedColorSensor.class, "Color1");
+        ColorSns1.setGain(gain);
+        ColorSns2 = hardwareMap.get(NormalizedColorSensor.class, "Color2");
+        ColorSns2.setGain(gain);
+        ColorSns3 = hardwareMap.get(NormalizedColorSensor.class, "Color2");
+        ColorSns3.setGain(gain);
 
     }
 
