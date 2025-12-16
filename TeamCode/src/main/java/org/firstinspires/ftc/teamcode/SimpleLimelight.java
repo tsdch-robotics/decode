@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.pedropathing.geometry.Pose; // Import Pedro's Pose
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import java.util.List;
 
 public class SimpleLimelight {
 
@@ -18,8 +20,7 @@ public class SimpleLimelight {
         limelight.start();
     }
 
-    // This function does all the math for you.
-    // It returns "null" if it can't see a tag, or a valid Pedro Pose if it can.
+    // This function returns "null" if it can't see a tag, or a valid Pedro Pose if it can.
     public Pose getPedroPose() {
         LLResult result = limelight.getLatestResult();
 
@@ -36,6 +37,45 @@ public class SimpleLimelight {
             }
         }
         return null;
+    }
+
+    public boolean isTagVisible(int targetId) {
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid()) {
+            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+            for (LLResultTypes.FiducialResult tag : fiducials) {
+                if (tag.getFiducialId() == targetId) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    public int getTagID() {
+        LLResult result = limelight.getLatestResult();
+        // Check if result is valid
+        if (result == null || !result.isValid()) {
+            return -1;
+        }
+
+        List<LLResultTypes.FiducialResult> tags = result.getFiducialResults();
+
+        // Loop through them to find our specific targets
+        for (LLResultTypes.FiducialResult tag : tags) {
+            int id = (int) tag.getFiducialId();
+            if (id >= 20 && id <= 24) {
+                return id;
+            }
+        }
+
+        return -1;
+    }
+
+
+    public void setPipeline(int index) {
+        limelight.pipelineSwitch(index);
     }
 
     public void stop() {
