@@ -11,6 +11,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -34,7 +35,7 @@ public class TeleOP extends OpMode {
 
     public DcMotor FIntake;
     public DcMotor BIntake;
-    public DcMotor Shoot;
+    public DcMotorEx Shoot;
     //public DcMotor Lift;
     public Servo Hood;
     public Servo SpinTop;
@@ -57,6 +58,7 @@ public class TeleOP extends OpMode {
     private boolean servo3Extended = false;
     private boolean servo3Waiting = false;
 
+
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
@@ -74,15 +76,15 @@ public class TeleOP extends OpMode {
         FIntake = hardwareMap.get(DcMotor.class, "FIntake");
         FIntake.setDirection(DcMotorSimple.Direction.REVERSE);
         BIntake = hardwareMap.get(DcMotor.class, "BIntake");
-        Shoot = hardwareMap.get(DcMotor.class, "Shoot");
-        Shoot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Shoot = hardwareMap.get(DcMotorEx.class, "Shoot");
+        Shoot.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
        // Lift = hardwareMap.get(DcMotor.class, "Lift");
 
 
         //Servos
         Hood= hardwareMap.get(Servo.class, "Hood");
-        Hood.setDirection(Servo.Direction.FORWARD);
-        //Hood.setPosition(0);
+        Hood.setDirection(Servo.Direction.REVERSE);
+        Hood.setPosition(0);
         SpinTop= hardwareMap.get(Servo.class, "SpinTop");
         SpinTop.setDirection(Servo.Direction.FORWARD);
         SpinTop.setPosition(0);
@@ -245,7 +247,18 @@ public class TeleOP extends OpMode {
             Pod3.setPosition(0);
 
         }
-
+        if(gamepad1.left_bumper){
+            SpinTop.setPosition(-.3);
+        }
+        if (gamepad1.right_bumper){
+            SpinTop.setPosition(+.3);
+        }
+        if(gamepad2.dpad_down){
+            Hood.setPosition(0);
+        }
+        if(gamepad2.dpad_up){
+            Hood.setPosition(.5);
+        }
 
         NormalizedRGBA colors1 = ColorSns1.getNormalizedColors();
         NormalizedRGBA colors2 = ColorSns2.getNormalizedColors();
@@ -335,7 +348,9 @@ public class TeleOP extends OpMode {
         telemetry.addData("position", follower.getPose());
 
         telemetry.addLine()
-                .addData("Shoot Speed", Shoot.getCurrentPosition());
+                .addData("Shoot Speed", Shoot.getVelocity());
         updateTelemetry(telemetry);
+
+
     }
 }
