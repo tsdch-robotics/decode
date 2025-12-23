@@ -76,8 +76,11 @@ public class TeleOP extends OpMode {
         FIntake = hardwareMap.get(DcMotor.class, "FIntake");
         FIntake.setDirection(DcMotorSimple.Direction.REVERSE);
         BIntake = hardwareMap.get(DcMotor.class, "BIntake");
-        Shoot = hardwareMap.get(DcMotorEx.class, "Shoot");
-        Shoot.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        Shoot = (DcMotorEx) hardwareMap.get(DcMotor.class, "Shoot");
+        if (Shoot != null) {
+            Shoot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            Shoot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        }
        // Lift = hardwareMap.get(DcMotor.class, "Lift");
 
 
@@ -123,6 +126,7 @@ public class TeleOP extends OpMode {
         //Call this once per loop
         follower.update();
         telemetryM.update();
+
 
         if (!automatedDrive) {
             //Make the last parameter false for field-centric
@@ -196,70 +200,96 @@ public class TeleOP extends OpMode {
             //shoot at correct speed
             Shoot.setPower(1);
         }
+
         if(gamepad1.dpad_down){
             Shoot.setPower(0);
         }
-        /*
-        if(Shoot.getCurrentPosition()> 3000){
+
+        if(Shoot.getVelocity()> 40000){
             gamepad1.rumble(1000);
         }
 
-         */
+
         if(gamepad1.b ){
             Pod1.setPosition(.4);
             servo1Extended = true;
             servo1Waiting = true;
             servoTimer1.reset();
         }
+
         if (servo1Waiting && servoTimer1.seconds() >= 1.3) {
             // Move servo back to home position
             Pod1.setPosition(0.0);  // Replace with your actual servo
             servo1Extended = false;
             servo1Waiting = false;
         }
+
         if(gamepad1.y ){
             Pod2.setPosition(.4);
             servo2Extended = true;
             servo2Waiting = true;
             servoTimer2.reset();
         }
+
         if (servo2Waiting && servoTimer2.seconds() >= 1.3) {
             // Move servo back to home position
             Pod2.setPosition(0.0);  // Replace with your actual servo
             servo2Extended = false;
             servo2Waiting = false;
         }
+
         if(gamepad1.x ){
             Pod3.setPosition(.4);
             servo3Extended = true;
             servo3Waiting = true;
             servoTimer3.reset();
         }
+
         if (servo3Waiting && servoTimer3.seconds() >= 1.3) {
             // Move servo back to home position
             Pod3.setPosition(0.0);  // Replace with your actual servo
             servo3Extended = false;
             servo3Waiting = false;
         }
+
         if(gamepad1.a){
             Pod1.setPosition(0);
             Pod2.setPosition(.0 );
             Pod3.setPosition(0);
 
         }
+
         if(gamepad1.left_bumper){
             SpinTop.setPosition(-.3);
         }
+
         if (gamepad1.right_bumper){
             SpinTop.setPosition(+.3);
         }
+
         if(gamepad2.dpad_down){
             Hood.setPosition(0);
         }
+
         if(gamepad2.dpad_up){
-            Hood.setPosition(.5);
+            Hood.setPosition(.07);
+        }
+        if(BIntake.isBusy()){
+            Shoot.setPower(0);
+        }
+        if(FIntake.isBusy()){
+            Shoot.setPower(0);
         }
 
+        double rpm = 0;
+        if (Shoot != null) {
+            double ticksPerSecond = Shoot.getVelocity();
+            double ticksPerRevolution = 28;
+            rpm = (ticksPerSecond / ticksPerRevolution) * 60;
+        } else {
+            // This will show up in Telemetry so you know why it's not working
+            telemetry.addLine("!!! SHOOT MOTOR NOT FOUND IN CONFIG !!!");
+        }
         NormalizedRGBA colors1 = ColorSns1.getNormalizedColors();
         NormalizedRGBA colors2 = ColorSns2.getNormalizedColors();
         NormalizedRGBA colors3 = ColorSns3.getNormalizedColors();
@@ -348,7 +378,7 @@ public class TeleOP extends OpMode {
         telemetry.addData("position", follower.getPose());
 
         telemetry.addLine()
-                .addData("Shoot Speed", Shoot.getVelocity());
+                .addData("Shoot Speed", rpm);
         updateTelemetry(telemetry);
 
 
